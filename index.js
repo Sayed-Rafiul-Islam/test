@@ -26,7 +26,7 @@ app.use(bodyParser.json())
 app.get('/books', (req, res) => {
     connection.query('SELECT * FROM books',(err,data)=>{
         if(err) {
-            console.log(err)
+        res.send(err)
         }
         res.send(data)
         
@@ -37,14 +37,7 @@ app.get('/books', (req, res) => {
 
 
 app.get('/', (req, res) => {
-    // res.send('running ')
-    connection.query('SELECT * FROM books',(err,data)=>{
-        if(err) {
-            console.log(err)
-        }
-        res.send(data)
-        
-    })  
+    res.send('running ')
 })
 app.listen(port, () => {
     console.log('crud is running')
