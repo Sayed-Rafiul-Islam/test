@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 
-const db = mysql.createConnection({
+const db = mysql.createPool({
     host : "localhost",
     port : "3308",
     user: "root",
