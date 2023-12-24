@@ -11,11 +11,11 @@ const port = process.env.PORT || 5000;
 
 
 const db = mysql.createPool({
-    host : "127.0.0.1",
-    port : "3308",
-    user: "root",
-    password : "12345678",
-    database : "test"
+    host : "sql12.freesqldatabase.com",
+    port : "3306",
+    user: "sql12672567",
+    password : "qhS2gjszTT",
+    database : "sql12672567"
 })
 
 
