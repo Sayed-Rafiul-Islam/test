@@ -2,12 +2,21 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken');
-const connection = require('./connection')
 require('dotenv').config()
+const mysql = require('mysql2');
 
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+
+const db = mysql.createConnection({
+    host : "localhost",
+    port : "3308",
+    user: "root",
+    password : "12345678",
+    database : "test"
+})
 
 
 // middleware
@@ -24,7 +33,7 @@ app.use(bodyParser.json())
 
 
 app.get('/books', (req, res) => {
-    connection.query('SELECT * FROM books',(err,data)=>{
+    db.query('SELECT * FROM books',(err,data)=>{
         if(err) {
         res.send(err)
         }
