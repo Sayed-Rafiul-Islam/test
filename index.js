@@ -49,6 +49,18 @@ function verifyJWT(req, res, next) {
 
 // -------------------------------------------
 
+app.get('/products', (req, res) => {
+    const query = `SELECT * FROM products`;
+    db.query(query,(err,result)=>{
+        if (err) {
+            console.log(err)
+        } 
+        else  { 
+            res.json(result)
+        }   
+    })     
+})
+
 
 app.get('/users', (req, res) => {
     const email = req.query.email + '.com';
