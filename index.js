@@ -50,13 +50,27 @@ function verifyJWT(req, res, next) {
 // -------------------------------------------
 
 app.get('/products', (req, res) => {
+    const page = req.query.page
+    const query = `SELECT * FROM products LIMIT ?, 10`;
+    db.query(query,[page*10],(err,result)=>{
+        if (err) {
+            console.log(err)
+        } 
+        else  { 
+            res.json(result)
+        }   
+    })     
+})
+app.get('/pageCount', (req, res) => {
+
     const query = `SELECT * FROM products`;
     db.query(query,(err,result)=>{
         if (err) {
             console.log(err)
         } 
         else  { 
-            res.json(result)
+            const pageCount = result.length / 10
+            res.json(pageCount)
         }   
     })     
 })
