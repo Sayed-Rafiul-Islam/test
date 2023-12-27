@@ -29,15 +29,14 @@ app.use(bodyParser.json())
 // JWT verification section 
 
 function verifyJWT(req, res, next) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-        return res.status(401).send({ message: 'Unauthorized Access' });
+    const accessToken = req.body.accessToken;
+    if (!accessToken) {
+        return res.status(401);
     }
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN
+    jwt.verify(accessToken, process.env.ACCESS_TOKEN
         , (err, decoded) => {
             if (err) {
-                return res.status(403).send({ message: 'Forbidden Access' });
+                return res.status(403);
             }
             req.decoded = decoded;
             next();
@@ -48,6 +47,44 @@ function verifyJWT(req, res, next) {
 
 
 // -------------------------------------------
+
+app.post('/addToCart', verifyJWT, (req, res) => {
+    const {productId} = req.body;
+    const decoded = req.decoded.email
+    const query = `SELECT orderId FROM orders WHERE email = '${decoded}' AND productId = ${productId}`;
+
+
+    db.query(query,(err,result)=>{
+        if (result.length === 1) {
+            const updateQuery = `UPDATE orders SET quantity = quantity + 1 WHERE orderId = '${result[0].orderId}'`
+            db.query(updateQuery,(err,result)=>{
+                if (err) {
+                    res.status(404).send("Not Found");
+                } else {
+                    res.status(200).send("Successfully Updated")
+                }
+            })
+            
+        } else {
+            const insertQuery = `INSERT INTO orders (
+                email,
+                productId,
+                quantity
+            ) 
+            VALUES ('${decoded}','${productId}','1')`;
+            
+            db.query(insertQuery,(err,result)=>{
+                if (err) {
+                    res.status(500).send("Internal server error")
+                } else {
+                    res.status(200).send("Successfully added")    
+                }     
+            }) 
+            
+        }
+      
+    })    
+})
 
 app.get('/products', (req, res) => {
     const page = req.query.page
@@ -78,7 +115,10 @@ app.get('/pageCount', (req, res) => {
 
 app.get('/users', (req, res) => {
     const email = req.query.email + '.com';
+    const currentDate = new Date()
     const password = req.query.password;
+
+    const data = {email : email, date : currentDate}
 
     const query = `SELECT * FROM users 
     WHERE email = '${email}'`;
@@ -89,7 +129,7 @@ app.get('/users', (req, res) => {
                 if(!result){
                     res.json({message: "Incorrect Password", result : result, accessToken : null},)
                 } else {
-                    const accessToken = jwt.sign({email}, process.env.ACCESS_TOKEN,{
+                    const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN,{
                         expiresIn : '1d'
                     })
                     res.json({message: "Successfully logged in", result : result, accessToken : accessToken})  
@@ -111,7 +151,10 @@ app.post('/addUser', async (req, res) => {
     ) 
     VALUES (?,?,?)`;
     const {userName,email,password} = req.body;
-    const accessToken = jwt.sign({email}, process.env.ACCESS_TOKEN,{
+    const currentDate = new Date()
+    const data = {email : email, date : currentDate}
+
+    const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN,{
         expiresIn : '1d'
     })
     bcrypt.hash(password, salt, (err,hash)=> {
@@ -143,3 +186,11 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log('crud is running')
 })
+
+
+
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRhZGFAZ21haWwuY29tIiwiaWF0IjoxNzAzNjYwNDI1LCJleHAiOjE3MDM2NjA0NTV9.OAhVedf5NYnBxXHigaQ2qZK6oVjU-0bTfSPusDBrgwE
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRhZGFAZ21haWwuY29tIiwiaWF0IjoxNzAzNjYwNDI1LCJleHAiOjE3MDM2NjA0NTV9.OAhVedf5NYnBxXHigaQ2qZK6oVjU-0bTfSPusDBrgwE
+// eyJlbWFpbCI6ImRhZGFAZ21haWwuY29tIiwiaWF0IjoxNzAzNjYwNDI1LCJleHAiOjE3MDM2NjA0NTV9
+
+
