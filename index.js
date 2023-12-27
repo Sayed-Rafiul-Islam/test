@@ -29,7 +29,7 @@ app.use(bodyParser.json())
 // JWT verification section 
 
 function verifyJWT(req, res, next) {
-    const accessToken = req.body.accessToken;
+    const accessToken = req.query.accessToken;
     if (!accessToken) {
         return res.status(401);
     }
@@ -43,10 +43,26 @@ function verifyJWT(req, res, next) {
         })
 }
 
-
-
-
 // -------------------------------------------
+
+app.get('/cart', verifyJWT, (req, res) => {
+    const decoded = req.decoded.email
+    const query = `SELECT o.productId, productName, image, o.quantity, price, o.quantity * price AS totalPrice  
+    FROM orders o 
+    JOIN products p 
+        ON o.productId = p.productId
+        WHERE email = '${decoded}'`;
+
+    db.query(query,(err,result)=>{
+        if (result.length > 0) {
+            res.status(200).send(result)
+        } else {
+            res.status(500).send("Internal server error")            
+        }
+      
+    })    
+})
+
 
 app.post('/addToCart', verifyJWT, (req, res) => {
     const {productId} = req.body;
