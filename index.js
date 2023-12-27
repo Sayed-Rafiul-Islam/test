@@ -29,6 +29,7 @@ app.use(bodyParser.json())
 // JWT verification section 
 
 function verifyJWT(req, res, next) {
+    
     const accessToken = req.query.accessToken;
     if (!accessToken) {
         return res.status(401);
@@ -193,6 +194,21 @@ app.post('/addUser', async (req, res) => {
     })   
 })
 
+app.delete('/product',verifyJWT, (req, res) => {
+    const productId = req.query.productId 
+    const decoded = req.decoded.email 
+
+    const query = `DELETE FROM orders WHERE email = '${decoded}' AND productId = '${productId}'`;
+    db.query(query,(err,result)=>{
+        if (err) {
+            res.status(500).send("Internal server error")     
+        } 
+        else  { 
+            res.status(200).send("Item Removed")
+        }   
+    })     
+})
+
 
 
 
@@ -204,9 +220,5 @@ app.listen(port, () => {
 })
 
 
-
-// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRhZGFAZ21haWwuY29tIiwiaWF0IjoxNzAzNjYwNDI1LCJleHAiOjE3MDM2NjA0NTV9.OAhVedf5NYnBxXHigaQ2qZK6oVjU-0bTfSPusDBrgwE
-// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRhZGFAZ21haWwuY29tIiwiaWF0IjoxNzAzNjYwNDI1LCJleHAiOjE3MDM2NjA0NTV9.OAhVedf5NYnBxXHigaQ2qZK6oVjU-0bTfSPusDBrgwE
-// eyJlbWFpbCI6ImRhZGFAZ21haWwuY29tIiwiaWF0IjoxNzAzNjYwNDI1LCJleHAiOjE3MDM2NjA0NTV9
 
 
