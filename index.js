@@ -131,7 +131,7 @@ app.get('/pageCount', (req, res) => {
 
 
 app.get('/users', (req, res) => {
-    const email = req.query.email + '.com';
+    const email = req.query.email ;
     const currentDate = new Date()
     const password = req.query.password;
 
