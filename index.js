@@ -1,6 +1,4 @@
 const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const mysql = require('mysql2');
@@ -22,9 +20,7 @@ const db = mysql.createPool({
 
 
 // middleware
-app.use(cors());
 app.use(express.json());
-app.use(bodyParser.json())
 
 // JWT verification section 
 
