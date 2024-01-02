@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
+const cors = require('cors');
 const salt = 10;
 
 
@@ -20,6 +21,7 @@ const db = mysql.createPool({
 
 
 // middleware
+app.use(cors());
 app.use(express.json());
 
 // JWT verification section 
@@ -61,42 +63,61 @@ app.get('/cart', verifyJWT, (req, res) => {
 })
 
 
-app.post('/addToCart', verifyJWT, (req, res) => {
-    const {productId} = req.body;
+app.post('/order', verifyJWT, (req, res) => {
+    const {orders,date,orderId,cost} = req.body;
     const decoded = req.decoded.email
-    const query = `SELECT orderId FROM orders WHERE email = '${decoded}' AND productId = ${productId}`;
+    const query = `INSERT INTO orders (
+                     orderId,
+                     email,
+                     order_date,
+                     total_price,
+                     orders
+                 ) 
+                 VALUES (${orderId},'${decoded}','${date}',${cost},'${orders}')`;
+        db.query(query,(err,result)=>{
+                        if (err) {
+                            res.status(500).send("Internal server error")
+                        } else {
+                            res.status(200).send("Successfully added")    
+                        }     
+                    }) 
 
 
-    db.query(query,(err,result)=>{
-        if (result.length === 1) {
-            const updateQuery = `UPDATE orders SET quantity = quantity + 1 WHERE orderId = '${result[0].orderId}'`
-            db.query(updateQuery,(err,result)=>{
-                if (err) {
-                    res.status(404).send("Not Found");
-                } else {
-                    res.status(200).send("Successfully Updated")
-                }
-            })
+    // const query = `SELECT orderId FROM orders WHERE email = '${decoded}' AND productId = ${productId}`;
+
+
+    // db.query(query,(err,result)=>{
+    //     if (result.length === 1) {
+    //         const updateQuery = `UPDATE orders SET quantity = quantity + 1 AND order_date = '${order_date}' WHERE orderId = '${result[0].orderId}'`
+    //         db.query(updateQuery,(err,result)=>{
+    //             if (err) {
+    //                 res.status(404).send("Not Found");
+    //             } else {
+    //                 res.status(200).send("Successfully Updated")
+    //             }
+    //         })
             
-        } else {
-            const insertQuery = `INSERT INTO orders (
-                email,
-                productId,
-                quantity
-            ) 
-            VALUES ('${decoded}','${productId}','1')`;
+    //     } else {
+    //         const insertQuery = `INSERT INTO orders (
+    //             orderId,
+    //             productId,
+    //             email,
+    //             quantity,
+    //             order_date
+    //         ) 
+    //         VALUES (${orderId},${productId},'${decoded}',${quantity},'${order_date}')`;
             
-            db.query(insertQuery,(err,result)=>{
-                if (err) {
-                    res.status(500).send("Internal server error")
-                } else {
-                    res.status(200).send("Successfully added")    
-                }     
-            }) 
+    //         db.query(insertQuery,(err,result)=>{
+    //             if (err) {
+    //                 res.status(500).send("Internal server error")
+    //             } else {
+    //                 res.status(200).send("Successfully added")    
+    //             }     
+    //         }) 
             
-        }
+    //     }
       
-    })    
+    // })    
 })
 
 app.get('/products', (req, res) => {
